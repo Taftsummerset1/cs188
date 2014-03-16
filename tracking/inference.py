@@ -260,6 +260,8 @@ class ParticleFilter(InferenceModule):
             and will produce errors
         """
         "*** YOUR CODE HERE ***"
+        self.particles = [random.choice(self.legalPositions) for _ in range(self.numParticles)]
+
 
     def observe(self, observation, gameState):
         """
@@ -294,7 +296,16 @@ class ParticleFilter(InferenceModule):
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.beliefs = util.Counter()
+        if noisyDistance == None:
+            self.beliefs[self.getJailPosition()] = 1.0
+        else:
+            for p in self.particles:
+                trueDistance = util.manhattanDistance(p, pacmanPosition)
+                if emissionModel[trueDistance] > 0:
+                    self.beliefs[p] = emissionModel[trueDistance]*self.beliefs[p]
+            if self.beliefs.totalCount == 0:
+                self.initializeUniformly(gameState)
 
     def elapseTime(self, gameState):
         """
@@ -321,7 +332,13 @@ class ParticleFilter(InferenceModule):
           essentially converts a list of particles into a belief distribution (a Counter object)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        self.beliefs = util.Counter()
+        for pos in self.particles:
+            self.beliefs[pos] += 1.0
+        for pos in self.beliefs:
+            self.beliefs[pos] = self.beliefs[pos] / self.numParticles
+        return self.beliefs
 
 class MarginalInference(InferenceModule):
     "A wrapper around the JointInference module that returns marginal beliefs about ghosts."
