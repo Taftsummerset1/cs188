@@ -146,7 +146,6 @@ class ExactInference(InferenceModule):
         pacmanPosition = gameState.getPacmanPosition()
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
         # Replace this code with a correct observation update
         # Be sure to handle the "jail" edge case where the ghost is eaten
@@ -154,7 +153,13 @@ class ExactInference(InferenceModule):
         allPossible = util.Counter()
         for p in self.legalPositions:
             trueDistance = util.manhattanDistance(p, pacmanPosition)
-            if emissionModel[trueDistance] > 0: allPossible[p] = 1.0
+            if noisyDistance == None:
+                allPossible[p] = 0.0
+            elif emissionModel[trueDistance] > 0: 
+                allPossible[p] = emissionModel[trueDistance]*self.beliefs[p]
+
+        if noisyDistance == None:
+            allPossible[self.getJailPosition()] = 1.0
 
         "*** END YOUR CODE HERE ***"
 
@@ -211,7 +216,14 @@ class ExactInference(InferenceModule):
         """
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        update = util.Counter()
+        for p in self.legalPositions:
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            old = self.beliefs[p]
+            for newPos, prob in newPosDist.items():
+                update[newPos] += old*prob
+        self.beliefs = update
 
     def getBeliefDistribution(self):
         return self.beliefs
