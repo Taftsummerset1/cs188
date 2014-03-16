@@ -157,47 +157,34 @@ class GreedyBustersAgent(BustersAgent):
         
         mostLikelyPos = [] #holds the most likely positions for the living ghosts
         for i,ghost in enumerate(livingGhosts):
-            #print "i: " + str(i)
-            #print "ghost: " + str(ghost)
             if i == 0 or not ghost:
                 continue
             else:
                 offset = livingGhosts[1:i].count(False)
-                #print "offset: " + str(offset)
                 bestValue = 0
                 bestP = None
-                #print "len: " + str(len(livingGhostPositionDistributions))
                 for p,value in livingGhostPositionDistributions[i-1-offset].items():
-                    #print "value: " + str(value)
-                    #print "p: "
-                    #print p
                     if value > bestValue:
                         bestValue = value
                         bestP = p
                 mostLikelyPos.append(bestP)
+
         bestP = None
         bestDistance = float('inf')
         for p in mostLikelyPos:
             d = self.distancer.getDistance(p, pacmanPosition)
-            print "d: " + str(d)
-            print "position: " 
-            print p
             if d < bestDistance:
                 bestDistance = d
                 bestP = p
-        print "bestPosition: "
-        print bestP
-        print "bestDistance: " + str(bestDistance) 
+
         bestAction = None
         bestDistance = float('inf')
+
         for action in legal:
-            #if action is None:
-            #   continue
             successorPosition = Actions.getSuccessor(pacmanPosition, action)
             d = self.distancer.getDistance(bestP, successorPosition)
             if d < bestDistance:
                 bestDistance = d
-                bestAction = a
-
+                bestAction = action
+                
         return bestAction
-        #util.raiseNotDefined()
