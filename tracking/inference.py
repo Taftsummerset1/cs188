@@ -262,7 +262,6 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
         self.particles = [random.choice(self.legalPositions) for _ in range(self.numParticles)]
 
-
     def observe(self, observation, gameState):
         """
         Update beliefs based on the given distance observation. Make
@@ -296,16 +295,31 @@ class ParticleFilter(InferenceModule):
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
-        self.beliefs = util.Counter()
+        weights = self.getBeliefDistribution()
+        
+        new = []
+
         if noisyDistance == None:
-            self.beliefs[self.getJailPosition()] = 1.0
-        else:
-            for p in self.particles:
-                trueDistance = util.manhattanDistance(p, pacmanPosition)
-                if emissionModel[trueDistance] > 0:
-                    self.beliefs[p] = emissionModel[trueDistance]*self.beliefs[p]
-            if self.beliefs.totalCount == 0:
-                self.initializeUniformly(gameState)
+            particle = self.getJailPosition()
+            new.append(particle)
+            self.particles = new
+            return
+        
+        possible = util.Counter()
+        for p, prob in weights.items():
+            d = util.manhattanDistance(p, pacmanPosition)
+            possible[p] = emissionModel[d] * prob
+        possible.normalize()
+
+        if possible[possible.argMax()] == 0:
+            self.initializeUniformly
+            return
+
+        for _ in self.particles:
+          new_particle = util.sample(possible, self.particles)
+          new.append(new_particle)
+        
+        self.particles = new
 
     def elapseTime(self, gameState):
         """
@@ -333,12 +347,11 @@ class ParticleFilter(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
 
-        self.beliefs = util.Counter()
+        beliefs = util.Counter()
         for pos in self.particles:
-            self.beliefs[pos] += 1.0
-        for pos in self.beliefs:
-            self.beliefs[pos] = self.beliefs[pos] / self.numParticles
-        return self.beliefs
+            beliefs[pos] += 1.0
+        beliefs.normalize()
+        return beliefs
 
 class MarginalInference(InferenceModule):
     "A wrapper around the JointInference module that returns marginal beliefs about ghosts."
