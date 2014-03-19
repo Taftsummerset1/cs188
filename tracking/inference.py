@@ -260,7 +260,14 @@ class ParticleFilter(InferenceModule):
             and will produce errors
         """
         "*** YOUR CODE HERE ***"
-        self.particles = [random.choice(self.legalPositions) for _ in range(self.numParticles)]
+        self.particles = []
+        num_particles = self.numParticles / len(self.legalPositions)
+        remaining_particles = self.numParticles % len(self.legalPositions)
+        for p in self.legalPositions:
+            for i in range(num_particles):
+                self.particles.append(p)
+        for i in range(remaining_particles):
+            self.particles.append(random.choice(self.legalPositions))
 
     def observe(self, observation, gameState):
         """
@@ -312,7 +319,7 @@ class ParticleFilter(InferenceModule):
         possible.normalize()
 
         if possible[possible.argMax()] == 0:
-            self.initializeUniformly
+            self.initializeUniformly(gameState)
             return
 
         for _ in self.particles:
