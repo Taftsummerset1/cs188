@@ -520,14 +520,10 @@ class JointParticleFilter:
                        self.particles[j] = self.getParticleWithGhostInJail(self.particles[j], i)
             return
 
- 
         for _ in self.particles:
            new_particle = util.sample(possible, self.particles)
            new.append(new_particle) 
-        
-        
         self.particles = new
-
         
     def getParticleWithGhostInJail(self, particle, ghostIndex):
         particle = list(particle)
@@ -573,6 +569,12 @@ class JointParticleFilter:
 
               The ghost agent you are meant to supply is self.ghostAgents[ghostIndex-1],
               but in this project all ghost agents are always the same.
+        new = []
+        for p in self.particles:
+            newPosDict = self.getPositionDistribution(self.setGhostPosition(gameState,p))
+            new_particle = util.sample(newPosDict, self.particles)
+            new.append(new_particle)
+        self.particles = new
         """
         newParticles = []
         for oldParticle in self.particles:
@@ -581,7 +583,10 @@ class JointParticleFilter:
             # now loop through and update each entry in newParticle...
 
             "*** YOUR CODE HERE ***"
-
+            prevGhostPositions = newParticle
+            for i in range(self.numGhosts):
+                newPosDict = getPositionDistributionForGhost(setGhostPositions(gameState, prevGhostPositions), i, self.ghostAgents[i])
+                newParticle[i] = util.sample(newPosDict, self.particles)
             "*** END YOUR CODE HERE ***"
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
