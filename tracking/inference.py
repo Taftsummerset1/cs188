@@ -569,12 +569,6 @@ class JointParticleFilter:
 
               The ghost agent you are meant to supply is self.ghostAgents[ghostIndex-1],
               but in this project all ghost agents are always the same.
-        new = []
-        for p in self.particles:
-            newPosDict = self.getPositionDistribution(self.setGhostPosition(gameState,p))
-            new_particle = util.sample(newPosDict, self.particles)
-            new.append(new_particle)
-        self.particles = new
         """
         newParticles = []
         for oldParticle in self.particles:
